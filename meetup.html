@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+  integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+  crossorigin=""></script>
+  <style type="text/css">
+  #mapid { height: 850px;
+    width: 1400px;}
+    </style>
+    <script
+    src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous">
+    </script>
+  </head>
+  <body>
+
+    <div id="mapid"></div>
+    <script>
+
+    $.ajax({
+      type: "GET",
+      url: "https://api.meetup.com/find/upcoming_events?zip=17601&radius=2&key=6a232e5e7f736471a63d6f5414f2b",
+      crossDomain: true,
+      dataType: "jsonp",
+      // Request was a success
+      success: function (response) {
+        var test = response.data.events;
+        for(var i = 0; i < test.length; i++){
+          // Determines if the venue address is available or not
+          if(test[i].venue == null){
+            var address = "Address TBD";
+          }
+          else {
+            var address = test[i].venue.address_1 + ", " + test[i].venue.city;
+          }
+          var eventData = {
+            name: test[i].name,
+            lat: test[i].group.lat,
+            lon: test[i].group.lon,
+            date: test[i].local_date,
+            time: test[i].local_time,
+            address: address
+          };
+
+          L.marker([eventData.lat, eventData.lon]).addTo(mymap).bindPopup("<b>"+eventData.name+"</b><br>"+eventData.date+" at "+eventData.time+"<br>"+eventData.address);
+          console.log(eventData);
+        }
+      },
+      error: function (xhr, status) {
+        console.log("failure");
+      }
+    });
+
+    var mymap = L.map('mapid').setView([40, -76.5], 10);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 18,
+      id: 'mapbox.streets',
+      accessToken: 'pk.eyJ1IjoiY25lbHMxOTg2IiwiYSI6ImNqbWo4eGc0ZTA1ajgza210Z3l1M295bDUifQ._BmwdIXkeAnJgaXe4ccxJA'
+    }).addTo(mymap);
+    </script>
+  </body>
+  </html>
